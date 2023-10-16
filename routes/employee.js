@@ -93,7 +93,7 @@ router.delete("/emp/remove/employee" , async (req,res) => {
     try{
         // find employee and delete
         await Employee.findOneAndDelete({_id:empId});
-        res.status(204)
+        res.status(204).json();
     }catch(e){
         res.status(500).json({message:`There was trouble deleting employee with id:${empId}`})
     }
