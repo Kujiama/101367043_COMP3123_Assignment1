@@ -31,19 +31,25 @@ router.post("/emp/employees", async (req,res) => {
     try{
         //destructure emp info
         const {firstName,lastName,email,gender,salary} = req.body;
+        const validGenders = ["male","female","other"];
 
-        const newEmp = new Employee({
-            firstName:firstName,
-            lastName:lastName,
-            email:email,
-            gender:gender,
-            salary:salary
-        });
+        if(!validGenders.includes(req.body.gender.toLowerCase())){
+            res.status(400).json({message:`Gender must be one of the following: ${validGenders}`})
+        }else{
+            const newEmp = new Employee({
+                firstName:firstName,
+                lastName:lastName,
+                email:email,
+                gender:gender,
+                salary:salary
+            });
+    
+            let savedEmp = await newEmp.save(); // save employee to database
+            let msg = {message:`Employee ${firstName} ${lastName} has been added`, EmployeeDetails:savedEmp}
+    
+            res.status(201).json(msg)
+        }
 
-        let savedEmp = await newEmp.save(); // save employee to database
-        let msg = {message:`Employee ${firstName} ${lastName} has been added`, EmployeeDetails:savedEmp}
-
-        res.status(201).json(msg)
     }catch(e){
         res.status(500).json({message:`There is a problem with adding new employee`});
     }
@@ -70,14 +76,19 @@ router.get("/emp/employees/:eid", async (req,res) => {
 // update employee
 router.put("/emp/employees/:eid" , async (req,res) => {
 
+    const validGenders = ["male","female","other"];
     const empId = req.params.eid;
     try{
-        const employee = await Employee.findByIdAndUpdate(empId,req.body)
-        res.status(200)
-        .json({
-            message:`employee ${empId} information has been updated`,
-            Prev_Details: employee
-        })
+        if(!validGenders.includes(req.body.gender.toLowerCase())){
+            res.status(400).json({message:`Gender must be one of the following: ${validGenders}`})
+        }else{
+            const employee = await Employee.findByIdAndUpdate(empId,req.body)
+            res.status(200)
+            .json({
+                message:`employee ${empId} information has been updated`,
+                Prev_Details: employee
+            })
+        }
     }catch(e){
         res.status(500).json({message:`There was trouble editing employee:${empId}`})
     }
